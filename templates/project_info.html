@@ -1,0 +1,173 @@
+{% extends "react_base.html" %}
+<head>
+  {% block extra_head %}
+  <link rel="stylesheet" href="static/default.css" />
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: auto;
+      font-family: "Poppins", sans-serif;
+      background: #02050a;
+    }
+
+    /* BACKGROUND CANVAS FIX */
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1; /* BELOW CARDS */
+    }
+
+    /* GRID (IF USED IN CSS) */
+    .grid {
+      z-index: 1;
+    }
+
+    /* Make cards visible above background */
+    #card-root,
+    #cards-root,
+    .btn {
+      position: relative;
+      z-index: 20 !important;
+    }
+  </style>
+  {% endblock extra_head %}
+</head>
+
+<body>
+  {% block content %}
+
+  <!-- Background -->
+  <div class="grid"></div>
+  <canvas id="background"></canvas>
+
+  <!-- Abstract Card -->
+  <div
+    id="card-root"
+    data-title="Abstract"
+    data-text="In propose paper author employing multilevel deep learning algorithms for pain recognition as all existing uni-level traditional machine learning algorithms are not good at recognition. Multilevel algorithm giving good accuracy compare to uni-level algorithms like SVM, Random Forest, Linear Regression etc. In propose work author optimizing, selecting features and performing classification using multilevel algorithms like CNN + BI-LSTM (bi-directional LSTM).
+Propose CNN + BI-LSTM is a multilevel algorithm where CNN will be using for features optimization and then BI-LSTM will select or extract relevant optimized features from CNN and then train a model for pain recognitions.
+To train and test all algorithms author has used different datasets like BioVid Heat Pain database and the Emopain 2021 dataset. This datasets contains two different pain signals such as EEG and EDA and author done experiment on both datasets but this datasets are not freely available to download so from GITHUB we have downloaded few subjects EEG pain signals dataset and then train with above mention algorithms. Each algorithm performance is evaluated using different metrics like Accuracy, precision, recall, FSCORE and LOSO (Leave-One-Subject-Out cross-validation evaluation). LOSO will evaluate model for each label by leaving and selecting one label so by applying this algorithm we can have accurate score of the model based on each class label.
+We have calculated correct prediction for each pain type using Confusion matrix graph and then calculated overall model score using LOSO.
+Automatic pain recognition is essential in healthcare. In previous studies, automatic pain recognition methods preferentially apply the features extracted from physiological signals for conventional models. These methods provide good performance but mainly rely on medical expertise for feature extraction of physiological signals. This paper presents a deep learning approach based on physiological signals that have the role of both feature extraction and classification, regardless of medical expertise. This paper proposes multilevel context information for each physiological signal discriminating between pain and painlessness. Experimental results prove that multi-level context information performs more significantly than uni-level context information based on Part A of the BioVid Heat Pain database and the Emopain 2021 dataset. For Part A of the BioVid Heat Pain database, our experimental results for pain recognition tasks include Pain 0 and Pain 1, Pain 0 and Pain 2, Pain 0 and Pain 3, and Pain 0 and Pain 4. 
+"
+    data-subtext=""
+  ></div>
+
+  <!-- Info Cards -->
+  <div
+    id="cards-root"
+    class="d-flex justify-content-center flex-wrap mt-5"
+  ></div>
+
+  <!-- Back Button -->
+  <div style="display: flex; justify-content: center; margin-top: 20px">
+    <a href="/" class="btn">Back to Home</a>
+  </div>
+
+  <!-- React Components -->
+  <script
+    type="text/babel"
+    src="{{ url_for('static', filename='react_components/GlossyCard.js') }}"
+  ></script>
+  <script
+    type="text/babel"
+    src="{{ url_for('static', filename='react_components/InfoCard.js') }}"
+  ></script>
+
+  <!-- Pass Card Data (ONLY ONCE) -->
+  <script id="card-data" type="application/json">
+    {{ card_data | tojson | safe }}
+  </script>
+
+  <!-- =============================
+     CLEAN PARTICLES BACKGROUND
+============================= -->
+  <script>
+    // Canvas Setup
+    const canvas = document.getElementById("background");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Particle Class
+    class Particle {
+      constructor() {
+        this.radius = 200 + Math.random() * 250;
+        this.angle = Math.random() * Math.PI * 2;
+        this.speed = 0.0008 + Math.random() * 0.0015;
+        this.size = Math.random() * 3 + 1;
+        const colors = ["#00eaff", "#0099ff", "#00ffd5", "#ff6262"];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      update() {
+        this.angle += this.speed;
+      }
+
+      draw(cx, cy) {
+        const x = cx + Math.cos(this.angle) * this.radius;
+        const y = cy + Math.sin(this.angle) * this.radius;
+
+        ctx.beginPath();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
+        ctx.arc(x, y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+
+    // Create Particles
+    const particles = [];
+    for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+    // Animate Background
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Soft glow
+      const gradient = ctx.createRadialGradient(cx, cy, 70, cx, cy, 500);
+      gradient.addColorStop(0, "rgba(0, 200, 255, 0.2)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p) => {
+        p.update();
+        p.draw(cx, cy);
+      });
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Mouse Parallax
+    document.addEventListener("mousemove", (e) => {
+      const dx = (e.clientX - window.innerWidth / 2) * 0.01;
+      const dy = (e.clientY - window.innerHeight / 2) * 0.01;
+
+      particles.forEach((p) => {
+        p.radius += dx * 0.05;
+        p.radius += dy * 0.05;
+      });
+    });
+
+    // Resize Fix
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+
+  {% endblock content %}
+</body>
